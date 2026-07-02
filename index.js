@@ -4,6 +4,9 @@ const app = express();
 const mysql = require("mysql2");
 const port = 3000;
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true })); //json->object
+
 const corsOptions = {
   origin: "*",
 };
@@ -26,6 +29,16 @@ app.get("/list", (req, res) => {
   const sqlQuery =
     "SELECT id, title, content, writer, DATE_FORMAT(date, '%Y-%m-%d') AS date FROM board;";
   db.query(sqlQuery, (err, result) => {
+    if (err) throw err;
+    res.send(result);
+  });
+});
+
+app.post("/write", (req, res) => {
+  const { title, name, content } = req.body;
+  const sqlQuery = "INSERT INTO board (title, content, writer) VALUES (?, ?, ?)";
+
+  db.query(sqlQuery, [title, content, name], (err, result) => {
     if (err) throw err;
     res.send(result);
   });
