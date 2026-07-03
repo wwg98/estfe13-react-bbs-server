@@ -34,6 +34,16 @@ app.get("/list", (req, res) => {
   });
 });
 
+app.get("/view", (req, res) => {
+  const id = req.query.id;
+  const sqlQuery =
+    "SELECT title, content, writer, DATE_FORMAT(date, '%Y-%m-%d') AS date FROM board WHERE id=?;";
+  db.query(sqlQuery, [id], (err, result) => {
+    if (err) throw err;
+    res.send(result);
+  });
+});
+
 app.post("/write", (req, res) => {
   const { title, name, content } = req.body;
   const sqlQuery = "INSERT INTO board (title, content, writer) VALUES (?, ?, ?)";
