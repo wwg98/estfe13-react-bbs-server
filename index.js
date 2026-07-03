@@ -64,6 +64,26 @@ app.post("/update", (req, res) => {
   });
 });
 
+app.post("/delete", (req, res) => {
+  const { id } = req.body;
+  const sqlQuery = "DELETE FROM board WHERE id=?;";
+
+  db.query(sqlQuery, [id], (err, result) => {
+    if (err) throw err;
+    res.send(result);
+  });
+});
+
+app.post("/deleteselect", (req, res) => {
+  const { boardIdList } = req.body;
+  const sqlQuery = `DELETE FROM board WHERE id in (${boardIdList});`;
+
+  db.query(sqlQuery, (err, result) => {
+    if (err) throw err;
+    res.send(result);
+  });
+});
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
