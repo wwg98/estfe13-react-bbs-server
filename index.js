@@ -107,6 +107,17 @@ app.post("/deleteselect", (req, res) => {
   console.log(req.body);
   const { boardIdList } = req.body;
 
+  //서버에서 여러 이미지 삭제
+  db.query(`SELECT image_path FROM board WHERE id in (${boardIdList})`, (err, result) => {
+    if (err) throw err;
+    if (result && result.length > 0) {
+      result.forEach(item => {
+        deleteUploadedFile(item.image_path);
+      });
+    }
+  });
+
+  // 데이터베이스 테이블에서 삭제
   const sqlQuery = `delete from board where id in (${boardIdList})`;
   db.query(sqlQuery, (err, result) => {
     if (err) throw err;
@@ -125,6 +136,14 @@ app.post("/update", upload.single("image"), (req, res) => {
   if (shouldRemoveImage && !imagePath) {
     //이미지 삭제 요청 O + 새이미지 X ->기존이미지 제거, image_path 값 비우기
     //서버에서 기존 이미지를 삭제
+
+    //글 번호 삭제할 이미지의 경로 파악
+    db.query("SELECT image_path FROM board WHERE id =?", [id], (err, result) => {
+      if (err) throw err;
+      const existingImagePath = result[0] ? result[0].image_path : null;
+      deleteUploadedFile(existingImagePath);
+    });
+
     sqlQuery = "UPDATE board SET writer=?, title=?, content=?, image_path=NULL WHERE id=?";
     params = [writer, title, content, id];
   } else if (imagePath) {
